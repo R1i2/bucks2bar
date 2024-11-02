@@ -1,24 +1,52 @@
-function InputValidation(){
+import { toPng } from 'html-to-image';
+function inputValidation() {
     document.getElementById('username').addEventListener('input', function () {
-        //get the value of the input element
+        // Get the value of the input element
         const username = this.value;
-        //regex to check if the username contains atleast 1 capital letter, atleast 1 number, atleast 1 special character and atealst 8 characters long
+        // Regex to check if the username contains at least 1 capital letter, at least 1 number, at least 1 special character, and at least 8 characters long
         const regex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
-        //check if the username matches the regex
-        if (regex.test(username)) {
-            //if it matches, set the border color to green
-            this.style.borderColor = 'green';
-        } else {
-            //if it does not match, set the border color to red
-            this.style.borderColor = 'red';
-        }
+        // Check if the username matches the regex
+        this.style.borderColor = regex.test(username) ? 'green' : 'red';
     });
 }
-document.addEventListener('DOMContentLoaded', function () {
-    const codeExecution = process.env.NODE_ENV
-    //on change event of a input element with id "username"
-    InputValidation();
-    function getValues() {
+async function sendEmailWithChart() {
+    const emailAddress = document.getElementById('email-address').value;
+    if (!emailAddress) {
+        alert('Please enter a valid email address.');
+        return;
+    }
+
+    try {
+        const chartElement = document.getElementById('myChart');
+        const chartImage = await toPng(chartElement);
+
+        const response = await fetch('http://localhost:3000/send-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ emailAddress, chartImage })
+        });
+
+        if (response.ok) {
+            console.log('Email sent successfully');
+        } else {
+            console.error('Error sending email:', await response.text());
+        }
+    } catch (error) {
+        console.error('Error generating chart image or sending email:', error);
+    }
+};
+document.addEventListener('DOMContentLoaded', () => {
+    let codeExecution = 'development';
+    if(typeof process !== "undefined" && process.env && process.env.NODE_ENV)
+    {
+        codeExecution = process.env.NODE_ENV;
+    }
+    // On change event of an input element with id "username"
+    inputValidation();
+
+    const getValues = () => {
         const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
         const data = {
             income: {},
@@ -39,14 +67,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         return data;
-    }
-    if(codeExecution !== 'test')
-    {
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
+    };
+
+    if (codeExecution !== 'test') {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July','August','September','October','November','December'],
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [{
                     label: 'Income',
                     data: [],
@@ -69,17 +97,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-        document.querySelector("button[data-bs-target='#chart']").addEventListener("click",()=>{
+
+        document.querySelector("button[data-bs-target='#chart']").addEventListener("click", () => {
             const values = getValues();
             myChart.data.datasets[0].data = Object.values(values.income);
             myChart.data.datasets[1].data = Object.values(values.expenses);
             myChart.update();
         });
-        document.getElementById('downloadChart').addEventListener('click', function () {
-            var link = document.createElement('a');
+
+        document.getElementById('downloadChart').addEventListener('click', () => {
+            const link = document.createElement('a');
             link.href = myChart.toBase64Image();
             link.download = 'chart.png';
             link.click();
         });
+        document.getElementById('send-email').addEventListener('click', sendEmailWithChart);
     }
 });
