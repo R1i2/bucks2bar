@@ -1,0 +1,16 @@
+{
+  "name": "bucks2bar",
+  "version": "1.0.0",
+  "description": "This project, Bucks2Bar, is a simple web application that uses Bootstrap for styling and Chart.js for displaying a bar chart. The project was created with the assistance of GitHub Copilot, which provided code suggestions and guidance throughout the development process.",
+  "main": "script.js",
+  "scripts": {
+    "test": "cross-env NODE_ENV=test jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
